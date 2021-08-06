@@ -18,3 +18,11 @@ function Compile(){
 function Run(){
     document.getElementById('iframe').srcdoc=document.getElementById('HTML').value+"\n<style>\n"+document.getElementById('CSS').value+'</style>'+"\n<script>"+document.getElementById('JS').value+'\n</script>';
 }
+
+function Download(){
+    var element = document.createElement('a');
+    code=document.getElementById('iframe').srcdoc;
+    element.setAttribute('href', 'data:text/text;charset=utf-8,' +      encodeURI(code));
+    element.setAttribute('download', "index.html");
+    element.click();
+}
