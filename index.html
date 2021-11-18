@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="shortcut icon" href="data:image/png; base64,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" type="image/x-icon">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auto HTML Compiler v1.0</title>
+</head>
+<body>
+    <input type='file' class='file-input' onchange='loadFile(event)' hidden>
+    <center>
+        <iframe src="" frameborder="0" id="iframe"></iframe>
+    </center>
+        <p style="font-family: 'Courier New', Courier, monospace;">Auto Compile? <input id='check' type="checkbox" style='cursor: pointer;'><br><button onclick="Run()" id='rn'>Run</button><br><button style='margin-top: 10px;' onclick="Download()" id='rn'>Download Code</button></p>
+    <center>
+        <textarea id="HTML" onkeyup="Compile()" placeholder="Enter Your HTML Code Here..." spellcheck="false"></textarea>
+        <br>
+        <textarea id='CSS' onkeyup="Compile()" placeholder="Enter CSS Code Here..." spellcheck="false"></textarea>
+        <br>
+        <textarea id='JS' onkeyup="Compile()" placeholder="Enter JavaScript Here..." spellcheck="false"></textarea>
+        <br>
+        <button style='margin-top: 10px;' onclick="loadFromURL()" id='rn'>Load From URL</button>
+        <button style='margin-top: 10px;' onclick="loadFromFile()" id='rn'>Load From File</button>
+        <button style='margin-top: 10px;' onclick="openInNewWindow()" id='rn' class='open-new-window'>Open Preview In New Window</button>
+        <br><br>
+        <a target="_blank" href="https://github.com/sancho1952007/Auto-HTML-Compiler">Like On Github</a>&nbsp;&nbsp;&nbsp;<a target="_blank" href="https://www.youtube.com/channel/UCA_3t4pPc9GRIFiP86kRD2Q">Subscribe On Youtube</a>
+    </center>
+</body>
+<style>
+    textarea{
+        width: 99%;
+        resize: none;
+        height: 30vh;
+        border-radius: 10px;
+        outline: none;
+    }
+    #iframe{
+        border: 1px solid black;
+        width: 99%;
+        height: 70vh;
+    }
+    #check{
+        outline: none;
+    }
+    #rn{
+        text-align: center;
+        width: 99%;
+        background-color: lightgrey;
+        border: 1px solid;
+        cursor: pointer;
+    }
+    a{
+        font-family: 'Courier New', Courier, monospace;
+    }
+</style>
+<script type="text/javascript" src='compile.js'>
+</script>
+
+<script>
+    var openInNewWindowBtn=document.querySelector('.open-new-window')
+    var liveCompile=document.querySelector('#check');
+    var file=document.querySelector('.file-input');
+    var HTML=document.querySelector('#HTML');
+    var CSS=document.querySelector('#CSS');
+    var JS=document.querySelector('#JS');
+
+    function loadFromURL(){
+        URL=prompt('Enter URL:')
+        if (URL.replace(/\s+/g, '').length == 0) {
+            alert('Please enter a valid URL!')
+        }
+
+        else{
+            try{
+                var request = null;
+                request=new XMLHttpRequest();
+                request.open('GET', URL, false);
+                request.send(null);
+                HTML.value=(request.responseText);
+                console.clear();
+            }
+            catch{
+                alert('Error Processing Request!')
+            }
+        }
+
+        Compile();
+    }
+
+    function loadFromFile(){
+        file.click();
+    }
+
+    function loadFile(event){
+        var contentURL = URL.createObjectURL(event.target.files[0]);
+        fetch(contentURL).then(function(response) {
+            return response.text();
+        }).then(function(text) {
+            HTML.value=text;
+        });
+        console.clear();
+
+        Compile();
+    }
+
+    function closeNewWindowPreview(){
+        preview.close();
+        openInNewWindowBtn.innerHTML='Open Preview In New Window';
+        openInNewWindowBtn.onclick=openInNewWindow();
+    }
+
+    function openInNewWindow(){
+        var preview=window.open("", '_blank');
+        preview.document.write(`${HTML.value}\n<style>\n${CSS.value}\n</style>\n<script>${JS.value}\n<\/script>`);
+        openInNewWindowBtn.innerHTML = "Close New Window Preview";
+        openInNewWindowBtn.onclick=closeNewWindowPreview();
+    }
+</script>
+
+</html>
