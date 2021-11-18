@@ -3,8 +3,13 @@ Auto Compile Your HTML File Even On PC &amp; Android Phones!
 
 <br>
 
-## *What Does It Do?*
+## What Does It Do?
 <pre>It Auto Compiles Your HTML, CSS & JS Code</pre>
+
+<br>
+
+## What's The Current Version?
+<pre>Current Version: 2.0</pre>
 
 <br>
 
