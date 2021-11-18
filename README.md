@@ -23,7 +23,3 @@ Auto Compile Your HTML File Even On PC &amp; Android Phones!
 
 ## How To Get There?
 <pre>Just Type <a href="https://sancho1952007.github.io/Auto-Code-Compiler">https://sancho1952007.github.io/Auto-Code-Compiler</a> In Your Address Bar To Get To The Site...</pre>
-
-<br><br>
-
-# ***Thank You :)***
