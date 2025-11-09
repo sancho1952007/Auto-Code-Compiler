@@ -1,4 +1,4 @@
-name: Build, Minify & Deploy to GitHub Pages
+name: Minify (HTML/CSS/JS) and Deploy to GitHub Pages
 
 on:
   push:
@@ -14,7 +14,7 @@ jobs:
       id-token: write
 
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Setup Node.js
@@ -22,41 +22,56 @@ jobs:
         with:
           node-version: '18'
 
-      - name: Install dependencies
+      - name: Verify dist/ exists
         run: |
-          npm ci
-          npm install --save-dev html-minifier-terser clean-css-cli terser
+          if [ ! -d "dist" ]; then
+            echo "Error: dist/ directory not found. Place your built site in dist/ before this workflow runs."
+            ls -la
+            exit 1
+          fi
 
-      - name: Minify HTML files (including embedded CSS/JS)
+      - name: Install minifier CLIs
         run: |
-          npx html-minifier-terser \
-            --input-dir dist \
-            --output-dir dist \
-            --file-ext html \
-            --collapse-whitespace \
-            --remove-comments \
-            --remove-optional-tags \
-            --remove-redundant-attributes \
-            --remove-empty-elements \
-            --minify-css true \
-            --minify-js true
+          # install CLI tools globally on the runner (avoids requiring package-lock.json)
+          npm install -g html-minifier-terser clean-css-cli terser
 
-      - name: Minify standalone CSS files
+      - name: Minify HTML files (in-place)
         run: |
-          find dist -type f -name "*.css" -exec npx cleancss -o {} {} \;
+          find dist -type f -name "*.html" -print0 | while IFS= read -r -d '' file; do
+            echo "Minifying HTML: $file"
+            html-minifier-terser \
+              --collapse-whitespace \
+              --remove-comments \
+              --remove-optional-tags \
+              --remove-redundant-attributes \
+              --remove-empty-elements \
+              --minify-css true \
+              --minify-js true \
+              -o "$file" "$file" || { echo "FAILED minifying $file"; exit 1; }
+          done
 
-      - name: Minify standalone JS files
+      - name: Minify CSS files (in-place)
         run: |
-          find dist -type f -name "*.js" -exec npx terser {} -o {} \;
+          find dist -type f -name "*.css" -print0 | while IFS= read -r -d '' file; do
+            echo "Minifying CSS: $file"
+            cleancss -o "$file" "$file" || { echo "FAILED minifying $file"; exit 1; }
+          done
 
-      - name: Upload site artifact
+      - name: Minify JS files (in-place)
+        run: |
+          find dist -type f -name "*.js" -print0 | while IFS= read -r -d '' file; do
+            echo "Minifying JS: $file"
+            terser "$file" -c -m -o "$file" || { echo "FAILED minifying $file"; exit 1; }
+          done
+
+      - name: Upload site artifact for Pages
         uses: actions/upload-pages-artifact@v3
         with:
           path: dist
 
       - name: Deploy to GitHub Pages
-        uses: actions/deploy-pages@v4
         id: deployment
+        uses: actions/deploy-pages@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
