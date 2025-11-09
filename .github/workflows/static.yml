@@ -1,0 +1,66 @@
+# .github/workflows/deploy-pages.yml
+name: Build, Minify & Deploy to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js / Bun
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          npm install --save-dev html-minifier-terser clean-css-cli terser
+
+      - name: Minify HTML files (including embedded CSS/JS)
+        run: |
+          npx html-minifier-terser \
+            --input-dir dist \
+            --output-dir dist \
+            --file-ext html \
+            --collapse-whitespace \
+            --remove-comments \
+            --remove-optional-tags \
+            --remove-redundant-attributes \
+            --remove-empty-elements \
+            --minify-css true \
+            --minify-js true
+
+      - name: Minify standalone CSS files
+        run: |
+          find dist -type f -name "*.css" -exec npx cleancss -o {} {} \;
+
+      - name: Minify standalone JS files
+        run: |
+          find dist -type f -name "*.js" -exec npx terser {} -o {} \;
+
+      - name: Upload site artifact
+        uses: actions/upload-pages-artifact@v1
+        with:
+          path: dist
+
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4
+        id: deploy
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
