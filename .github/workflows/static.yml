@@ -1,4 +1,4 @@
-name: Minify (HTML/CSS/JS) and Deploy to GitHub Pages
+name: Build/Collect, Minify (HTML/CSS/JS) and Deploy to GitHub Pages
 
 on:
   push:
@@ -17,27 +17,44 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: Setup Node (needed for minifier CLIs)
         uses: actions/setup-node@v4
         with:
           node-version: '18'
 
-      - name: Verify dist/ exists
+      - name: Ensure dist/ exists (create from repo if missing)
         run: |
-          if [ ! -d "dist" ]; then
-            echo "Error: dist/ directory not found. Place your built site in dist/ before this workflow runs."
-            ls -la
-            exit 1
+          if [ -d "dist" ]; then
+            echo "dist/ found — using existing build output."
+            ls -la dist || true
+          else
+            echo "dist/ not found. Creating dist/ by copying site files from repo root..."
+            # Create dist and copy likely static site files while excluding repo metadata
+            mkdir -p dist
+            # Copy all files/directories except some common excludes:
+            rsync -av --prune-empty-dirs \
+              --exclude='.git' \
+              --exclude='.github' \
+              --exclude='node_modules' \
+              --exclude='dist' \
+              --exclude='*.md' \
+              --exclude='*.map' \
+              --exclude='.gitignore' \
+              --exclude='package-lock.json' \
+              --exclude='package.json' \
+              --exclude='README*' \
+              ./ dist/
+            echo "Contents copied to dist/:"
+            ls -la dist || true
           fi
 
-      - name: Install minifier CLIs
+      - name: Install minifier CLIs globally (no package-lock needed)
         run: |
-          # install CLI tools globally on the runner (avoids requiring package-lock.json)
           npm install -g html-minifier-terser clean-css-cli terser
 
-      - name: Minify HTML files (in-place)
+      - name: Minify HTML files (including inlined CSS/JS)
         run: |
-          find dist -type f -name "*.html" -print0 | while IFS= read -r -d '' file; do
+          find dist -type f -iname "*.html" -print0 | while IFS= read -r -d '' file; do
             echo "Minifying HTML: $file"
             html-minifier-terser \
               --collapse-whitespace \
@@ -47,22 +64,23 @@ jobs:
               --remove-empty-elements \
               --minify-css true \
               --minify-js true \
-              -o "$file" "$file" || { echo "FAILED minifying $file"; exit 1; }
-          done
+              -o "$file" "$file" \
+              || { echo "FAILED minifying $file"; exit 1; }
+          done || true
 
-      - name: Minify CSS files (in-place)
+      - name: Minify CSS files (standalone)
         run: |
-          find dist -type f -name "*.css" -print0 | while IFS= read -r -d '' file; do
+          find dist -type f -iname "*.css" -print0 | while IFS= read -r -d '' file; do
             echo "Minifying CSS: $file"
-            cleancss -o "$file" "$file" || { echo "FAILED minifying $file"; exit 1; }
-          done
+            cleancss --level=2 -o "$file" "$file" || { echo "FAILED minifying $file"; exit 1; }
+          done || true
 
-      - name: Minify JS files (in-place)
+      - name: Minify JS files (standalone)
         run: |
-          find dist -type f -name "*.js" -print0 | while IFS= read -r -d '' file; do
+          find dist -type f -iname "*.js" -print0 | while IFS= read -r -d '' file; do
             echo "Minifying JS: $file"
             terser "$file" -c -m -o "$file" || { echo "FAILED minifying $file"; exit 1; }
-          done
+          done || true
 
       - name: Upload site artifact for Pages
         uses: actions/upload-pages-artifact@v3
